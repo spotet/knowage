@@ -42,6 +42,8 @@ RUN	chmod +x ${JWS_HOME}/bin/* && chmod +x ${JWS_HOME}/* && chown -R jboss ${JWS
 RUN chmod g+w ${JWS_HOME}/conf && chmod g+w ${JWS_HOME}/webapps/knowage/WEB-INF && chmod g+w ${JWS_HOME}/logs && chmod g+w ${JWS_HOME}/temp
 RUN curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash && yum install -y MariaDB-client.x86_64
 RUN yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm -y && yum install xmlstarlet -y
+RUN chmod -R g+w ${JWS_HOME}/
+
 
 WORKDIR ${KNOWAGE_DIRECTORY}
 
