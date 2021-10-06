@@ -13,9 +13,6 @@ COPY mysql-dbscripts-8_0_0-RC-20210716.zip ${JWS_HOME}
 COPY setenv.sh ${JWS_HOME}/bin/
 COPY server.xml context.xml knowage-default.policy hazelcast.xml ${JWS_HOME}/conf/
 
-RUN curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash && yum install -y MariaDB-client.x86_64 iproute openssl
-RUN yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm -y && yum install xmlstarlet -y
-
 RUN mkdir ${JWS_HOME}/resources ${JWS_HOME}/conf/context.xml.d ${JWS_HOME}/conf/server.xml.d && mkdir ${JWS_HOME}/webapps/knowage && \
     cd ${JWS_HOME}; unzip mysql-dbscripts-8_0_0-RC-20210716.zip && rm mysql-dbscripts-8_0_0-RC-20210716.zip && \
     cd ${JWS_HOME}/webapps/knowage; \
@@ -48,6 +45,8 @@ RUN	chmod +x ${JWS_HOME}/bin/* && chmod +x ${JWS_HOME}/* && chown -R jboss ${JWS
 RUN chmod g+w ${JWS_HOME}/conf && chmod g+w ${JWS_HOME}/webapps/knowage/WEB-INF && chmod g+w ${JWS_HOME}/logs && chmod g+w ${JWS_HOME}/temp
 RUN chmod -R g+w ${JWS_HOME}/
 RUN sed -i "s|CONTAINER_INITIALIZED_PLACEHOLDER=\/.CONTAINER_INITIALIZED|CONTAINER_INITIALIZED_PLACEHOLDER=/tmp/.CONTAINER_INITIALIZED|g" ${KNOWAGE_DIRECTORY}/entrypoint.sh
+RUN curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash && yum install -y MariaDB-client.x86_64 iproute openssl
+RUN yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm -y && yum install xmlstarlet -y
 
 WORKDIR ${KNOWAGE_DIRECTORY}
 
