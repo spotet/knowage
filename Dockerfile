@@ -38,7 +38,7 @@ COPY extGlobalResources ${JWS_HOME}/conf/server.xml.d
 COPY extContext ${JWS_HOME}/conf/context.xml.d
 COPY CHANGELOG.md LICENSE README.md entrypoint.sh wait-for-it.sh ${JWS_HOME}/
 USER root
-RUN	chmod +x ${JWS_HOME}/bin/* && chmod +x ${JWS_HOME}/* && chown jboss ${JWS_HOME}/* && ln -s ${JWS_HOME}/conf ${JWS_HOME}/apache-tomcat && yum install -y iproute openssl
+RUN	chmod +x ${JWS_HOME}/bin/* && chmod +x ${JWS_HOME}/* && chown -R jboss ${JWS_HOME}/* && sed -i "s|apache-tomcat\/||g" ${KNOWAGE_DIRECTORY}/entrypoint.sh && yum install -y iproute openssl
 
 WORKDIR ${KNOWAGE_DIRECTORY}
 
