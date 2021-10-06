@@ -9,7 +9,7 @@ ARG KNOWAGE_DL_URL=https://release.ow2.org/knowage/8.0.0-RC/Applications
 ENV MYSQL_SCRIPT_DIRECTORY=${JWS_HOME}/mysql
 
 COPY mysql-dbscripts-8_0_0-RC-20210716.zip ${JWS_HOME}
-RUN mkdir ${JWS_HOME}/webapps/knowage && \
+RUN mkdir ${JWS_HOME}/resources ${JWS_HOME}/conf/context.xml.d ${JWS_HOME}/conf/server.xml.d && mkdir ${JWS_HOME}/webapps/knowage && \
     cd ${JWS_HOME}; unzip mysql-dbscripts-8_0_0-RC-20210716.zip && rm mysql-dbscripts-8_0_0-RC-20210716.zip && \
     cd ${JWS_HOME}/webapps/knowage; \
     for i in $(curl -Ls ${KNOWAGE_DL_URL} --list-only |sed -n 's%.*href="\([^.]*-CE-.*\.zip\)".*%\n\1%; ta; b; :a; s%.*\n%%; p'); \
@@ -28,6 +28,11 @@ RUN mkdir ${JWS_HOME}/webapps/knowage && \
     sed -i "s/bin\/sh/bin\/bash/" ${JWS_HOME}/bin/startup.sh && \
     sed -i "s/EXECUTABLE\" start/EXECUTABLE\" run/" ${JWS_HOME}/bin/startup.sh
 
+COPY setenv.sh ${JWS_HOME}/bin/
+COPY server.xml context.xml knowage-default.policy hazelcast.xml ${JWS_HOME}/conf/
+COPY services-whitelist.xml ${JWS_HOME}/resources
+COPY extGlobalResources ${JWS_HOME}/conf/server.xml.d
+COPY extContext ${JWS_HOME}/conf/context.xml.d
 #COPY server.xml context.xml knowage-default.policy hazelcast.xml ${JWS_HOME}/conf/
 
 USER 1001
