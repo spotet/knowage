@@ -40,6 +40,7 @@ COPY CHANGELOG.md LICENSE README.md entrypoint.sh wait-for-it.sh ${JWS_HOME}/
 USER root
 RUN	chmod +x ${JWS_HOME}/bin/* && chmod +x ${JWS_HOME}/* && chown -R jboss ${JWS_HOME}/* && sed -i "s|apache-tomcat\/||g" ${KNOWAGE_DIRECTORY}/entrypoint.sh && yum install -y iproute openssl
 RUN chmod g+w ${JWS_HOME}/conf && chmod g+w ${JWS_HOME}/webapps/knowage/WEB-INF && chmod g+w ${JWS_HOME}/logs && chmod g+w ${JWS_HOME}/temp
+RUN curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash && yum install -y MariaDB-client.x86_64
 
 WORKDIR ${KNOWAGE_DIRECTORY}
 
