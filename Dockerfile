@@ -32,13 +32,12 @@ RUN mkdir ${JWS_HOME}/resources ${JWS_HOME}/conf/context.xml.d ${JWS_HOME}/conf/
     sed -i "s/bin\/sh/bin\/bash/" ${JWS_HOME}/bin/startup.sh && \
     sed -i "s/EXECUTABLE\" start/EXECUTABLE\" run/" ${JWS_HOME}/bin/startup.sh
 
-USER root
-RUN	ls -l ${JWS_HOME}/bin/ && whoami && chmod +x ${JWS_HOME}/bin/*
-USER java
 COPY services-whitelist.xml ${JWS_HOME}/resources
 COPY extGlobalResources ${JWS_HOME}/conf/server.xml.d
 COPY extContext ${JWS_HOME}/conf/context.xml.d
 COPY CHANGELOG.md LICENSE README.md entrypoint.sh wait-for-it.sh ${JWS_HOME}/
+USER root
+RUN	chmod +x ${JWS_HOME}/bin/* && chmod +x ${JWS_HOME}/* && chown jboss ${JWS_HOME}/*
 
 WORKDIR ${KNOWAGE_DIRECTORY}
 
@@ -46,6 +45,6 @@ WORKDIR ${KNOWAGE_DIRECTORY}
 
 EXPOSE 8080 8009
 
-ENTRYPOINT ["${JWS_HOME}/entrypoint.sh"]
+ENTRYPOINT ["/opt/jws-5.2/tomcat/entrypoint.sh"]
 
 CMD ["/opt/jws-5.2/tomcat/bin/startup.sh"]
