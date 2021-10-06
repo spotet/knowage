@@ -30,13 +30,14 @@ RUN mkdir ${JWS_HOME}/resources ${JWS_HOME}/conf/context.xml.d ${JWS_HOME}/conf/
     curl -LOs https://search.maven.org/remotecontent?filepath=org/apache/geronimo/specs/geronimo-commonj_1.1_spec/1.0/geronimo-commonj_1.1_spec-1.0.jar && \
     curl -LOs https://github.com/SpagoBILabs/SpagoBI/blob/mvn-repo/releases/de/myfoo/commonj/1.0/commonj-1.0.jar && \
     sed -i "s/bin\/sh/bin\/bash/" ${JWS_HOME}/bin/startup.sh && \
-    sed -i "s/EXECUTABLE\" start/EXECUTABLE\" run/" ${JWS_HOME}/bin/startup.sh && \
-	chmod +x ${JWS_HOME}/bin/*
+    sed -i "s/EXECUTABLE\" start/EXECUTABLE\" run/" ${JWS_HOME}/bin/startup.sh
+
+RUN	ls -l ${JWS_HOME}/bin/ && whoami && chmod +x ${JWS_HOME}/bin/*
 
 COPY services-whitelist.xml ${JWS_HOME}/resources
 COPY extGlobalResources ${JWS_HOME}/conf/server.xml.d
 COPY extContext ${JWS_HOME}/conf/context.xml.d
-COPY CHANGELOG.md LICENSE  README.md entrypoint.sh wait-for-it.sh ${JWS_HOME}/
+COPY CHANGELOG.md LICENSE README.md entrypoint.sh wait-for-it.sh ${JWS_HOME}/
 
 WORKDIR ${KNOWAGE_DIRECTORY}
 
