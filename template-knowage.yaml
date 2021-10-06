@@ -1,0 +1,192 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  app: knowage
+metadata:
+  annotations:
+    description: |
+      This template deploys a community knowage server :
+        - A container with knowage
+        - A service to interact with knowage
+        - A route to request knowage
+        - A PVC for persitant storage
+    openshift.io/display-name: knowage
+    openshift.io/provider-display-name: SIGMA Informatique
+    tags: knowage,openjdk
+  name: knowage
+
+parameters:
+- displayName: knowage service name
+  name: KNOWAGE_SERVICE_NAME
+  required: true
+  value: knowage
+- displayName: Volume Space for knowage
+  name: KNOWAGE_VOLUME_CAPACITY
+  value: 3Gi
+- displayName: knowage memory limit
+  name: KNOWAGE_MEMORY_LIMIT
+  value: 2Gi
+- displayName: knowage cpu limit
+  name: NEXUS_CPU_LIMIT
+  value: 400m
+- displayName: knowage memory request
+  name: KNOWAGE_MEMORY_REQUEST
+  required: true
+  value: 0
+- displayName: knowage cpu request
+  name: KNOWAGE_CPU_REQUEST
+  required: true
+  value: 0
+- displayName: Imagestream Name
+  name: IS_NAME
+  value: knowage
+- displayName: Imagestream Version
+  name: IS_VERSION
+  value: "8.1.0"
+- displayName: Imagestream Namespace
+  name: IS_NAMESPACE
+  value: openshift
+- name: KNOWAGE_USER
+  description: Username for the knowage instance
+  value: knowage_user
+- name: KNOWAGE_PASS
+  description: Password securing the knowage instance
+  #value: knowage_password
+  generate: expression
+  from: "[a-zA-Z0-9]{16}"
+
+objects:
+
+- kind: Secret
+  apiVersion: v1
+  stringData:
+    username: ${KNOWAGE_USER}
+    password: ${KNOWAGE_PASS}
+  metadata:
+    name: ${KNOWAGE_SERVICE_NAME}
+  type: Opaque
+
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    labels:
+      app: ${KNOWAGE_SERVICE_NAME}
+    name: ${KNOWAGE_SERVICE_NAME}
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: ${KNOWAGE_SERVICE_NAME}
+    template:
+      metadata:
+        labels:
+          deploymentconfig: ${KNOWAGE_SERVICE_NAME}
+      spec:
+        containers:
+        - env:
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: ${KNOWAGE_SERVICE_NAME}
+                key: username
+          - name: DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: ${KNOWAGE_SERVICE_NAME}
+                key: password
+
+          - DB_USER=knowage_user
+          - DB_PASS=knowage_password
+          - DB_DB=knowage
+          - DB_HOST=claims-master-knowage-db
+          - DB_PORT=3306
+          - CACHE_DB_HOST=claims-master-knowage-cache
+          - CACHE_DB_PORT=3306
+          - CACHE_DB_DB=knowage
+          - CACHE_DB_USER=knowage_user
+          - CACHE_DB_PASS=knowage_password
+          - HMAC_KEY=key
+          - PASSWORD_ENCRYPTION_SECRET=secret
+          - PUBLIC_ADDRESS=bi.demo.claims-ia.tech
+          
+          image: ' '
+          imagePullPolicy: IfNotPresent
+          name: ${KNOWAGE_SERVICE_NAME}
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources:
+            limits:
+              cpu: ${KNOWAGE_CPU_LIMIT}
+              memory: ${KNOWAGE_MEMORY_LIMIT}
+            requests:
+              cpu: ${KNOWAGE_CPU_LIMIT}
+              memory: ${KNOWAGE_MEMORY_LIMIT}
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /
+            name: ${KNOWAGE_SERVICE_NAME}-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: ${KNOWAGE_SERVICE_NAME}-data
+          persistentVolumeClaim:
+          claimName: ${KNOWAGE_SERVICE_NAME}-pv
+    test: false
+    triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${KNOWAGE_SERVICE_NAME}
+        from:
+          kind: ImageStreamTag
+          name: ${IS_NAME}:${IS_VERSION}
+          namespace: ${IS_NAMESPACE}
+
+- kind: service
+  apiVersion: v1
+  metadata:
+    labels:
+      app: ${KNOWAGE_SERVICE_NAME}
+    name: ${KNOWAGE_SERVICE_NAME}
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: ${KNOWAGE_SERVICE_NAME}
+    sessionAffinity: None
+    type: ClusterIP
+
+- kind: Route
+  apiVersion: v1
+  metadata:
+    labels:
+      app: ${KNOWAGE_SERVICE_NAME}
+    name: ${KNOWAGE_SERVICE_NAME}
+  spec:
+    port:
+      targetPort: 8080-tcp
+    tls:
+      termination: edge
+    to:
+      kind: Service
+      name: ${KNOWAGE_SERVICE_NAME}
+      weight: 100
+
+- kind: PersistantVolumeClaim
+  apiVersion: v1
+  metadata:
+    labels:
+      app: ${KNOWAGE_SERVICE_NAME}
+    name: ${KNOWAGE_SERVICE_NAME}-pv
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: ${KNOWAGE_VOLUME_CAPACITY}
