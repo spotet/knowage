@@ -30,7 +30,7 @@ RUN mkdir ${JWS_HOME}/resources ${JWS_HOME}/conf/context.xml.d ${JWS_HOME}/conf/
     curl -LOs https://search.maven.org/remotecontent?filepath=org/apache/geronimo/specs/geronimo-commonj_1.1_spec/1.0/geronimo-commonj_1.1_spec-1.0.jar && \
     curl -LOs https://github.com/SpagoBILabs/SpagoBI/blob/mvn-repo/releases/de/myfoo/commonj/1.0/commonj-1.0.jar?raw=true && \
     curl -LOs https://search.maven.org/remotecontent?filepath=org/aktivecortex/aktivecortex-foo-commonj/1.3.2/aktivecortex-foo-commonj-1.3.2.jar && \
-	curl -LOs https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.2/slf4j-api-1.7.2.jar && \
+	#curl -LOs https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.2/slf4j-api-1.7.2.jar && \
 	curl -LOs https://repo1.maven.org/maven2/log4j/log4j/1.2.16/log4j-1.2.16.jar && \	
     sed -i "s/bin\/sh/bin\/bash/" ${JWS_HOME}/bin/startup.sh && \
     sed -i "s/EXECUTABLE\" start/EXECUTABLE\" run/" ${JWS_HOME}/bin/startup.sh
@@ -45,8 +45,8 @@ RUN	chmod +x ${JWS_HOME}/bin/* && chmod +x ${JWS_HOME}/* && chown -R jboss ${JWS
 RUN chmod g+w ${JWS_HOME}/conf && chmod g+w ${JWS_HOME}/webapps/knowage/WEB-INF && chmod g+w ${JWS_HOME}/logs && chmod g+w ${JWS_HOME}/temp
 RUN chmod -R g+w ${JWS_HOME}/
 RUN sed -i "s|CONTAINER_INITIALIZED_PLACEHOLDER=\/.CONTAINER_INITIALIZED|CONTAINER_INITIALIZED_PLACEHOLDER=/tmp/.CONTAINER_INITIALIZED|g" ${KNOWAGE_DIRECTORY}/entrypoint.sh
-RUN curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash && yum install -y MariaDB-client.x86_64 iproute openssl
-RUN yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm -y && yum install xmlstarlet -y
+RUN curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash && yum install -y MariaDB-client.x86_64 iproute openssl && \
+    yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm -y && yum install xmlstarlet -y
 
 WORKDIR ${KNOWAGE_DIRECTORY}
 
