@@ -7,8 +7,12 @@ LABEL io.k8s.description="Knowage Community Edition Server" \
 ARG KNOWAGE_VERSION=8.0.0-RC
 ARG KNOWAGE_DL_URL=https://release.ow2.org/knowage/8.0.0-RC/Applications
 ENV MYSQL_SCRIPT_DIRECTORY=${JWS_HOME}/mysql
+ENV KNOWAGE_DIRECTORY ${JWS_HOME}
 
 COPY mysql-dbscripts-8_0_0-RC-20210716.zip ${JWS_HOME}
+COPY setenv.sh ${JWS_HOME}/bin/
+COPY server.xml context.xml knowage-default.policy hazelcast.xml ${JWS_HOME}/conf/
+
 RUN mkdir ${JWS_HOME}/resources ${JWS_HOME}/conf/context.xml.d ${JWS_HOME}/conf/server.xml.d && mkdir ${JWS_HOME}/webapps/knowage && \
     cd ${JWS_HOME}; unzip mysql-dbscripts-8_0_0-RC-20210716.zip && rm mysql-dbscripts-8_0_0-RC-20210716.zip && \
     cd ${JWS_HOME}/webapps/knowage; \
@@ -26,19 +30,20 @@ RUN mkdir ${JWS_HOME}/resources ${JWS_HOME}/conf/context.xml.d ${JWS_HOME}/conf/
     curl -LOs https://search.maven.org/remotecontent?filepath=org/apache/geronimo/specs/geronimo-commonj_1.1_spec/1.0/geronimo-commonj_1.1_spec-1.0.jar && \
     curl -LOs https://github.com/SpagoBILabs/SpagoBI/blob/mvn-repo/releases/de/myfoo/commonj/1.0/commonj-1.0.jar && \
     sed -i "s/bin\/sh/bin\/bash/" ${JWS_HOME}/bin/startup.sh && \
-    sed -i "s/EXECUTABLE\" start/EXECUTABLE\" run/" ${JWS_HOME}/bin/startup.sh
+    sed -i "s/EXECUTABLE\" start/EXECUTABLE\" run/" ${JWS_HOME}/bin/startup.sh && \
+	chmod +x ${JWS_HOME}/bin/*
 
-COPY setenv.sh ${JWS_HOME}/bin/
-COPY server.xml context.xml knowage-default.policy hazelcast.xml ${JWS_HOME}/conf/
 COPY services-whitelist.xml ${JWS_HOME}/resources
 COPY extGlobalResources ${JWS_HOME}/conf/server.xml.d
 COPY extContext ${JWS_HOME}/conf/context.xml.d
-#COPY server.xml context.xml knowage-default.policy hazelcast.xml ${JWS_HOME}/conf/
+COPY CHANGELOG.md LICENSE  README.md entrypoint.sh wait-for-it.sh ${JWS_HOME}/
 
-USER 1001
+WORKDIR ${KNOWAGE_DIRECTORY}
+
+#USER 1001
 
 EXPOSE 8080 8009
 
-#ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["${JWS_HOME}/entrypoint.sh"]
 
 CMD ["/opt/jws-5.2/tomcat/bin/startup.sh"]
