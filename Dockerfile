@@ -32,8 +32,9 @@ RUN mkdir ${JWS_HOME}/resources ${JWS_HOME}/conf/context.xml.d ${JWS_HOME}/conf/
     sed -i "s/bin\/sh/bin\/bash/" ${JWS_HOME}/bin/startup.sh && \
     sed -i "s/EXECUTABLE\" start/EXECUTABLE\" run/" ${JWS_HOME}/bin/startup.sh
 
+USER root
 RUN	ls -l ${JWS_HOME}/bin/ && whoami && chmod +x ${JWS_HOME}/bin/*
-
+USER java
 COPY services-whitelist.xml ${JWS_HOME}/resources
 COPY extGlobalResources ${JWS_HOME}/conf/server.xml.d
 COPY extContext ${JWS_HOME}/conf/context.xml.d
