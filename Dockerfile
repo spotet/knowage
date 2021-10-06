@@ -38,7 +38,7 @@ COPY extGlobalResources ${JWS_HOME}/conf/server.xml.d
 COPY extContext ${JWS_HOME}/conf/context.xml.d
 COPY CHANGELOG.md LICENSE README.md entrypoint.sh wait-for-it.sh ${JWS_HOME}/
 USER root
-RUN	chmod +x ${JWS_HOME}/bin/* && chmod +x ${JWS_HOME}/* && chown jboss ${JWS_HOME}/* && yum install -y iproute
+RUN	chmod +x ${JWS_HOME}/bin/* && chmod +x ${JWS_HOME}/* && chown jboss ${JWS_HOME}/* && yum install -y iproute openssl
 
 WORKDIR ${KNOWAGE_DIRECTORY}
 
