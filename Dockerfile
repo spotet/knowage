@@ -30,8 +30,8 @@ RUN mkdir ${JWS_HOME}/resources ${JWS_HOME}/conf/context.xml.d ${JWS_HOME}/conf/
     curl -LOs https://search.maven.org/remotecontent?filepath=org/apache/geronimo/specs/geronimo-commonj_1.1_spec/1.0/geronimo-commonj_1.1_spec-1.0.jar && \
     curl -LOs https://github.com/SpagoBILabs/SpagoBI/blob/mvn-repo/releases/de/myfoo/commonj/1.0/commonj-1.0.jar?raw=true && \
     curl -LOs https://search.maven.org/remotecontent?filepath=org/aktivecortex/aktivecortex-foo-commonj/1.3.2/aktivecortex-foo-commonj-1.3.2.jar && \
-	#curl -LOs https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.2/slf4j-api-1.7.2.jar && \
-	curl -LOs https://repo1.maven.org/maven2/log4j/log4j/1.2.16/log4j-1.2.16.jar && \	
+	curl -LOs https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.2/slf4j-api-1.7.2.jar && \
+	#curl -LOs https://repo1.maven.org/maven2/log4j/log4j/1.2.16/log4j-1.2.16.jar && \	
     sed -i "s/bin\/sh/bin\/bash/" ${JWS_HOME}/bin/startup.sh && \
     sed -i "s/EXECUTABLE\" start/EXECUTABLE\" run/" ${JWS_HOME}/bin/startup.sh
 
