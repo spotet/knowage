@@ -13,6 +13,9 @@ USER root
 RUN curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash && yum install -y MariaDB-client.x86_64 iproute openssl wget coreutils && \
     yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm -y && yum install xmlstarlet -y
 
+RUN curl -LOs https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.54/bin/apache-tomcat-9.0.54.zip && unzip apache-tomcat-9.0.54.zip && \
+    rm -rf ${JWS_HOME}/* && mv apache-tomcat-9.0.54/* ${JWS_HOME} && rm -rf apache-tomcat-*
+
 COPY mysql-dbscripts-8_0_0-RC-20210716.zip ${JWS_HOME}
 COPY setenv.sh ${JWS_HOME}/bin/
 COPY server.xml context.xml knowage-default.policy hazelcast.xml ${JWS_HOME}/conf/
