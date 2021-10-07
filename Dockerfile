@@ -32,15 +32,15 @@ RUN cd ${JWS_HOME}/lib; \
     curl -LOs https://search.maven.org/remotecontent?filepath=commons-logging/commons-logging-api/1.1/commons-logging-api-1.1.jar && \
     curl -LOs https://search.maven.org/remotecontent?filepath=org/lucee/oswego-concurrent/1.3.4/oswego-concurrent-1.3.4.jar && \
     curl -LOs https://search.maven.org/remotecontent?filepath=org/apache/geronimo/specs/geronimo-commonj_1.1_spec/1.0/geronimo-commonj_1.1_spec-1.0.jar && \
-    curl -LOs https://github.com/SpagoBILabs/SpagoBI/blob/mvn-repo/releases/de/myfoo/commonj/1.0/commonj-1.0.jar?raw=true && \
+    curl -LOs https://github.com/SpagoBILabs/SpagoBI/blob/mvn-repo/releases/de/myfoo/commonj/1.0/commonj-1.0.jar && \
     curl -LOs https://search.maven.org/remotecontent?filepath=org/aktivecortex/aktivecortex-foo-commonj/1.3.2/aktivecortex-foo-commonj-1.3.2.jar
 RUN sed -i "s/bin\/sh/bin\/bash/" ${JWS_HOME}/bin/startup.sh && \
     sed -i "s/EXECUTABLE\" start/EXECUTABLE\" run/" ${JWS_HOME}/bin/startup.sh
-RUN cd ${JWS_HOME}/lib; \
+#RUN cd ${JWS_HOME}/lib; \
     #curl -LOs https://search.maven.org/remotecontent?filepath=org/slf4j/slf4j-api/2.0.0-alpha5/slf4j-api-2.0.0-alpha5.jar && \
-    curl -LOs https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.2/slf4j-api-1.7.2.jar && \
+#    curl -LOs https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.2/slf4j-api-1.7.2.jar && \
     #curl -LOs https://search.maven.org/remotecontent?filepath=works/lmz/composite/composite-logging-slf4j-api/1.1/composite-logging-slf4j-api-1.1.jar && \
-	curl -LOs https://repo1.maven.org/maven2/log4j/log4j/1.2.16/log4j-1.2.16.jar
+#	curl -LOs https://repo1.maven.org/maven2/log4j/log4j/1.2.16/log4j-1.2.16.jar
     
 
 COPY .env ${JWS_HOME}/
