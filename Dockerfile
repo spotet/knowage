@@ -4,8 +4,8 @@ LABEL io.k8s.description="Knowage Community Edition Server" \
     io.k8s.display-name="Knowage" \
     io.openshift.tags="knowage"
 
-ARG KNOWAGE_VERSION=8.0.0-RC
-ARG KNOWAGE_DL_URL=https://release.ow2.org/knowage/8.0.0-RC/Applications
+ARG KNOWAGE_VERSION=8.0.0
+ARG KNOWAGE_DL_URL=https://release.ow2.org/knowage/8.0.0/Applications
 ENV MYSQL_SCRIPT_DIRECTORY=${JWS_HOME}/mysql
 ENV KNOWAGE_DIRECTORY ${JWS_HOME}
 
@@ -16,12 +16,12 @@ RUN curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash && 
 RUN curl -LOs https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.54/bin/apache-tomcat-9.0.54.zip && unzip apache-tomcat-9.0.54.zip && \
     rm -rf ${JWS_HOME}/* && mv apache-tomcat-9.0.54/* ${JWS_HOME} && rm -rf apache-tomcat-*
 
-COPY mysql-dbscripts-8_0_0-RC-20210716.zip ${JWS_HOME}
+COPY mysql-dbscripts-8_0_0-20211006.zip ${JWS_HOME}
 COPY setenv.sh ${JWS_HOME}/bin/
 COPY server.xml context.xml knowage-default.policy hazelcast.xml ${JWS_HOME}/conf/
 
 RUN mkdir ${JWS_HOME}/resources ${JWS_HOME}/conf/context.xml.d ${JWS_HOME}/conf/server.xml.d && mkdir ${JWS_HOME}/webapps/knowage && \
-    cd ${JWS_HOME}; unzip mysql-dbscripts-8_0_0-RC-20210716.zip && rm mysql-dbscripts-8_0_0-RC-20210716.zip && \
+    cd ${JWS_HOME}; unzip mysql-dbscripts-8_0_0-20211006.zip && rm mysql-dbscripts-8_0_0-20211006.zip && \
     cd ${JWS_HOME}/webapps/knowage; \
     for i in $(curl -Ls ${KNOWAGE_DL_URL} --list-only |sed -n 's%.*href="\([^.]*-CE-.*\.zip\)".*%\n\1%; ta; b; :a; s%.*\n%%; p'); \
     do curl -LOs ${KNOWAGE_DL_URL}/${i}; \
