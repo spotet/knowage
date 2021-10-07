@@ -56,7 +56,8 @@ RUN chmod +x ${JWS_HOME}/bin/* && chmod +x ${JWS_HOME}/* && chown -R jboss ${JWS
     chmod -R g+w ${JWS_HOME}/ && \
     sed -i "s|CONTAINER_INITIALIZED_PLACEHOLDER=\/.CONTAINER_INITIALIZED|CONTAINER_INITIALIZED_PLACEHOLDER=/tmp/.CONTAINER_INITIALIZED|g" ${KNOWAGE_DIRECTORY}/entrypoint.sh
 
-RUN rm -rf ${JWS_HOME}/lib/{jolokia.jar,mysql-connector-java.jar,jboss-logging.jar,mongo.jar,postgresql-jdbc.jar,tomcat-vault.jar,ecj-4.12.0.redhat-1.jar}
+RUN rm -rf ${JWS_HOME}/webapps/knowage/WEB-INF/lib/{commonj-1.0.jar,commons-logging-1.1.1.jar,geronimo-commonj_1.1_spec-1.0.jar}
+RUN rm -rf ${JWS_HOME}/lib/jsp-api.jar
 
 WORKDIR ${KNOWAGE_DIRECTORY}
 
