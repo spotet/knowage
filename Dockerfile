@@ -10,7 +10,7 @@ ENV MYSQL_SCRIPT_DIRECTORY=${JWS_HOME}/mysql
 ENV KNOWAGE_DIRECTORY ${JWS_HOME}
 
 USER root
-RUN curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash && yum install -y MariaDB-client.x86_64 iproute openssl wget coreutils && \
+RUN curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash && yum install -y MariaDB-client.x86_64 iproute openssl wget coreutils apr-devel openssl-devel && \
     yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm -y && yum install xmlstarlet -y
 
 RUN curl -LOs https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.54/bin/apache-tomcat-9.0.54.zip && unzip apache-tomcat-9.0.54.zip && \
