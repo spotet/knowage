@@ -36,10 +36,11 @@ RUN cd ${JWS_HOME}/lib; \
     curl -LOs https://search.maven.org/remotecontent?filepath=org/aktivecortex/aktivecortex-foo-commonj/1.3.2/aktivecortex-foo-commonj-1.3.2.jar
 RUN sed -i "s/bin\/sh/bin\/bash/" ${JWS_HOME}/bin/startup.sh && \
     sed -i "s/EXECUTABLE\" start/EXECUTABLE\" run/" ${JWS_HOME}/bin/startup.sh
-RUN curl -LOs https://search.maven.org/remotecontent?filepath=org/slf4j/slf4j-api/2.0.0-alpha5/slf4j-api-2.0.0-alpha5.jar
+RUN cd ${JWS_HOME}/lib; \
+    curl -LOs https://search.maven.org/remotecontent?filepath=org/slf4j/slf4j-api/2.0.0-alpha5/slf4j-api-2.0.0-alpha5.jar && \
     #curl -LOs https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.2/slf4j-api-1.7.2.jar && \
     #curl -LOs https://search.maven.org/remotecontent?filepath=works/lmz/composite/composite-logging-slf4j-api/1.1/composite-logging-slf4j-api-1.1.jar && \
-	#curl -LOs https://repo1.maven.org/maven2/log4j/log4j/1.2.16/log4j-1.2.16.jar && \	
+	curl -LOs https://repo1.maven.org/maven2/log4j/log4j/1.2.16/log4j-1.2.16.jar && \	
     
 
 COPY .env ${JWS_HOME}/
