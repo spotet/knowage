@@ -33,7 +33,10 @@ RUN cd ${JWS_HOME}/lib; \
     curl -LOs https://search.maven.org/remotecontent?filepath=org/lucee/oswego-concurrent/1.3.4/oswego-concurrent-1.3.4.jar && \
     curl -LOs https://search.maven.org/remotecontent?filepath=org/apache/geronimo/specs/geronimo-commonj_1.1_spec/1.0/geronimo-commonj_1.1_spec-1.0.jar && \
 	#curl -LOs https://search.maven.org/remotecontent?filepath=org/aktivecortex/aktivecortex-foo-commonj/1.3.2/aktivecortex-foo-commonj-1.3.2.jar && \
-    curl -L https://github.com/SpagoBILabs/SpagoBI/blob/mvn-repo/releases/de/myfoo/commonj/1.0/commonj-1.0.jar?raw=true -o commonj-1.0.jar
+    curl -L https://github.com/SpagoBILabs/SpagoBI/blob/mvn-repo/releases/de/myfoo/commonj/1.0/commonj-1.0.jar?raw=true -o commonj-1.0.jar && \
+	curl -LOs https://search.maven.org/remotecontent?filepath=org/hsqldb/hsqldb/1.8.0.10/hsqldb-1.8.0.10.jar && \
+	curl -LOs https://jdbc.postgresql.org/download/postgresql-42.2.4.jar && \
+	curl -LOs https://search.maven.org/remotecontent?filepath=mysql/mysql-connector-java/5.1.33/mysql-connector-java-5.1.33.jar
 RUN sed -i "s/bin\/sh/bin\/bash/" ${JWS_HOME}/bin/startup.sh && \
     sed -i "s/EXECUTABLE\" start/EXECUTABLE\" run/" ${JWS_HOME}/bin/startup.sh
 #RUN cd ${JWS_HOME}/lib; \
