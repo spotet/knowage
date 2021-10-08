@@ -5,43 +5,42 @@ LABEL io.k8s.description="Knowage Community Edition Server" \
     io.openshift.tags="knowage"
 
 ARG KNOWAGE_VERSION=8.0.0
-ARG KNOWAGE_DL_URL=https://release.ow2.org/knowage/8.0.0/Applications
+ARG KNOWAGE_DL_URL=https://release.ow2.org/knowage/8.0.0/Applications/
 ENV MYSQL_SCRIPT_DIRECTORY=${JWS_HOME}/mysql
 ENV KNOWAGE_DIRECTORY ${JWS_HOME}
 ENV KNOWAGE_PACKAGE_SUFFIX=bin-8_0_0-CE-20211006
-ENV KNOWAGE_SRC_URL=https://release.ow2.org/knowage/8.0.0/Applications/
 ENV KNOWAGE_CORE_ENGINE=knowage
-ENV KNOWAGE_CORE_URL=${KNOWAGE_SRC_URL}${KNOWAGE_CORE_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
+ENV KNOWAGE_CORE_URL=${KNOWAGE_DL_URL}${KNOWAGE_CORE_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
 ENV KNOWAGE_BIRTREPORT_ENGINE=knowagebirtreportengine
-ENV KNOWAGE_BIRTREPORT_URL=${KNOWAGE_SRC_URL}${KNOWAGE_BIRTREPORT_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
+ENV KNOWAGE_BIRTREPORT_URL=${KNOWAGE_DL_URL}${KNOWAGE_BIRTREPORT_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
 ENV KNOWAGE_COCKPIT_ENGINE=knowagecockpitengine
-ENV KNOWAGE_COCKPIT_URL=${KNOWAGE_SRC_URL}${KNOWAGE_COCKPIT_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
+ENV KNOWAGE_COCKPIT_URL=${KNOWAGE_DL_URL}${KNOWAGE_COCKPIT_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
 ENV KNOWAGE_COMMONJ_ENGINE=knowagecommonjengine
-ENV KNOWAGE_COMMONJ_URL=${KNOWAGE_SRC_URL}${knowagecommonjengine}-${KNOWAGE_PACKAGE_SUFFIX}.zip
+ENV KNOWAGE_COMMONJ_URL=${KNOWAGE_DL_URL}${KNOWAGE_COMMONJ_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
 ENV KNOWAGE_DATAMINING_ENGINE=knowagedataminingengine
-ENV KNOWAGE_DATAMINING_URL=${KNOWAGE_SRC_URL}${KNOWAGE_DATAMINING_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
+ENV KNOWAGE_DATAMINING_URL=${KNOWAGE_DL_URL}${KNOWAGE_DATAMINING_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
 ENV KNOWAGE_GEOREPORT_ENGINE=knowagegeoreportengine
-ENV KNOWAGE_GEOREPORT_URL=${KNOWAGE_SRC_URL}${KNOWAGE_GEOREPORT_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
+ENV KNOWAGE_GEOREPORT_URL=${KNOWAGE_DL_URL}${KNOWAGE_GEOREPORT_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
 ENV KNOWAGE_JASPERREPORT_ENGINE=knowagejasperreportengine
-ENV KNOWAGE_JASPERREPORT_URL=${KNOWAGE_SRC_URL}${KNOWAGE_JASPERREPORT_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
+ENV KNOWAGE_JASPERREPORT_URL=${KNOWAGE_DL_URL}${KNOWAGE_JASPERREPORT_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
 ENV KNOWAGE_KPI_ENGINE=knowagekpiengine
-ENV KNOWAGE_KPI_URL=${KNOWAGE_SRC_URL}${KNOWAGE_KPI_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
+ENV KNOWAGE_KPI_URL=${KNOWAGE_DL_URL}${KNOWAGE_KPI_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
 ENV KNOWAGE_META_ENGINE=knowagemeta
-ENV KNOWAGE_META_URL=${KNOWAGE_SRC_URL}${KNOWAGE_META_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
+ENV KNOWAGE_META_URL=${KNOWAGE_DL_URL}${KNOWAGE_META_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
 ENV KNOWAGE_NETWORK_ENGINE=knowagenetworkengine
-ENV KNOWAGE_NETWORK_URL=${KNOWAGE_SRC_URL}${KNOWAGE_NETWORK_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
+ENV KNOWAGE_NETWORK_URL=${KNOWAGE_DL_URL}${KNOWAGE_NETWORK_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
 ENV KNOWAGE_QBE_ENGINE=knowageqbeengine
-ENV KNOWAGE_QBE_URL=${KNOWAGE_SRC_URL}knowageqbeengine-${KNOWAGE_PACKAGE_SUFFIX}.zip
+ENV KNOWAGE_QBE_URL=${KNOWAGE_DL_URL}knowageqbeengine-${KNOWAGE_PACKAGE_SUFFIX}.zip
 ENV KNOWAGE_SVGVIEWER_ENGINE=knowagesvgviewerengine
-ENV KNOWAGE_SVGVIEWER_URL=${KNOWAGE_SRC_URL}${KNOWAGE_SVGVIEWER_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
+ENV KNOWAGE_SVGVIEWER_URL=${KNOWAGE_DL_URL}${KNOWAGE_SVGVIEWER_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
 ENV KNOWAGE_TALEND_ENGINE=knowagetalendengine
-ENV KNOWAGE_TALEND_URL=${KNOWAGE_SRC_URL}${KNOWAGE_TALEND_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
+ENV KNOWAGE_TALEND_URL=${KNOWAGE_DL_URL}${KNOWAGE_TALEND_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
 ENV KNOWAGE_WHATIF_ENGINE=knowagewhatifengine
-ENV KNOWAGE_WHATIF_URL=${KNOWAGE_SRC_URL}${KNOWAGE_WHATIF_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
+ENV KNOWAGE_WHATIF_URL=${KNOWAGE_DL_URL}${KNOWAGE_WHATIF_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip
 
 USER root
 RUN curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash && yum install -y MariaDB-client.x86_64 iproute openssl wget coreutils apr-devel openssl-devel && \
-    yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm -y && yum install xmlstarlet -y
+    yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm -y && yum install xmlstarlet -y && yum clean all
 
 RUN curl -LOs https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.54/bin/apache-tomcat-9.0.54.zip && unzip apache-tomcat-9.0.54.zip && \
     rm -rf ${JWS_HOME}/* && mv apache-tomcat-9.0.54/* ${JWS_HOME} && rm -rf apache-tomcat-*
@@ -73,20 +72,13 @@ RUN cd ${JWS_HOME}/lib; \
     curl -LOs https://search.maven.org/remotecontent?filepath=commons-logging/commons-logging-api/1.1/commons-logging-api-1.1.jar && \
     curl -LOs https://search.maven.org/remotecontent?filepath=org/lucee/oswego-concurrent/1.3.4/oswego-concurrent-1.3.4.jar && \
     curl -LOs https://search.maven.org/remotecontent?filepath=org/apache/geronimo/specs/geronimo-commonj_1.1_spec/1.0/geronimo-commonj_1.1_spec-1.0.jar && \
-    #curl -LOs https://search.maven.org/remotecontent?filepath=org/aktivecortex/aktivecortex-foo-commonj/1.3.2/aktivecortex-foo-commonj-1.3.2.jar && \
     curl -L https://github.com/SpagoBILabs/SpagoBI/blob/mvn-repo/releases/de/myfoo/commonj/1.0/commonj-1.0.jar?raw=true -o commonj-1.0.jar && \
     curl -LOs https://search.maven.org/remotecontent?filepath=org/hsqldb/hsqldb/1.8.0.10/hsqldb-1.8.0.10.jar && \
     curl -LOs https://jdbc.postgresql.org/download/postgresql-42.2.4.jar && \
     curl -LOs https://search.maven.org/remotecontent?filepath=mysql/mysql-connector-java/5.1.33/mysql-connector-java-5.1.33.jar
 RUN sed -i "s/bin\/sh/bin\/bash/" ${JWS_HOME}/bin/startup.sh && \
     sed -i "s/EXECUTABLE\" start/EXECUTABLE\" run/" ${JWS_HOME}/bin/startup.sh
-#RUN cd ${JWS_HOME}/lib; \
-    #curl -LOs https://search.maven.org/remotecontent?filepath=org/slf4j/slf4j-api/2.0.0-alpha5/slf4j-api-2.0.0-alpha5.jar && \
-    #curl -LOs https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.2/slf4j-api-1.7.2.jar && \
-    #curl -LOs https://search.maven.org/remotecontent?filepath=works/lmz/composite/composite-logging-slf4j-api/1.1/composite-logging-slf4j-api-1.1.jar && \
-    #curl -LOs https://repo1.maven.org/maven2/log4j/log4j/1.2.16/log4j-1.2.16.jar
 
-#COPY .env ${JWS_HOME}/
 COPY services-whitelist.xml ${JWS_HOME}/resources
 COPY extGlobalResources ${JWS_HOME}/conf/server.xml.d
 COPY extContext ${JWS_HOME}/conf/context.xml.d
