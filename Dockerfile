@@ -51,7 +51,7 @@ COPY server.xml context.xml knowage-default.policy hazelcast.xml ${JWS_HOME}/con
 
 RUN mkdir ${JWS_HOME}/resources ${JWS_HOME}/conf/context.xml.d ${JWS_HOME}/conf/server.xml.d && mkdir ${JWS_HOME}/webapps/knowage && \
     cd ${JWS_HOME}; unzip mysql-dbscripts-8_0_0-20211006.zip && rm mysql-dbscripts-8_0_0-20211006.zip && \
-    cd ${JWS_HOME}/webapps/knowage; \
+    cd ${JWS_HOME}/webapps/; \
     wget -q --no-check-certificate "${KNOWAGE_CORE_URL}" && unzip -o ${KNOWAGE_CORE_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip && rm ${KNOWAGE_CORE_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip && unzip ${KNOWAGE_CORE_ENGINE}.war -d ${KNOWAGE_CORE_ENGINE} && rm ${KNOWAGE_CORE_ENGINE}.war && \
     wget -q --no-check-certificate "${KNOWAGE_BIRTREPORT_URL}" && unzip -o ${KNOWAGE_BIRTREPORT_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip && rm ${KNOWAGE_BIRTREPORT_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip && unzip ${KNOWAGE_BIRTREPORT_ENGINE}.war -d ${KNOWAGE_BIRTREPORT_ENGINE} && rm ${KNOWAGE_BIRTREPORT_ENGINE}.war && \
     wget -q --no-check-certificate "${KNOWAGE_COCKPIT_URL}" && unzip -o ${KNOWAGE_COCKPIT_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip && rm ${KNOWAGE_COCKPIT_ENGINE}-${KNOWAGE_PACKAGE_SUFFIX}.zip && unzip ${KNOWAGE_COCKPIT_ENGINE}.war -d ${KNOWAGE_COCKPIT_ENGINE} && rm ${KNOWAGE_COCKPIT_ENGINE}.war && \
