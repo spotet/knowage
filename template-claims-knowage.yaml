@@ -31,16 +31,12 @@ objects:
 - apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
   metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewApp
-    creationTimestamp: null
-    generation: 61
     labels:
       app: knowage
     name: knowage
   spec:
     replicas: 1
-    revisionHistoryLimit: 10
+    revisionHistoryLimit: 3
     selector:
       app: knowage
       deploymentconfig: knowage
@@ -56,9 +52,6 @@ objects:
       type: Rolling
     template:
       metadata:
-        annotations:
-          openshift.io/generated-by: OpenShiftNewApp
-        creationTimestamp: null
         labels:
           app: knowage
           deploymentconfig: knowage
