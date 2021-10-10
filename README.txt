@@ -7,3 +7,7 @@ https://github.com/KnowageLabs/Knowage-Server-Docker/blob/knowage-server-8.0/Kno
 
 sh-4.2$ cat ./webapps/knowage/themes/sbi_default/jsp/login.jsp
 The userid/password is biadmin/biadmin
+
+
+oc delete all,cm,secret -l app=knowage-spo -n spo-dev
+oc delete all,cm,secret -l app=mariadb -n spo-dev

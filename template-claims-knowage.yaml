@@ -3,7 +3,10 @@ kind: Template
 message: |-
   Below the information of generated entries, tokens and passwords :
 
-    PROJECT_NAME          : ${PROJECT_NAME}
+    APPLICATION                : ${APPLICATION}
+    HMAC_KEY                   : ${HMAC_KEY}
+    PASSWORD_ENCRYPTION_SECRET : ${PASSWORD_ENCRYPTION_SECRET}
+    PUBLIC_ADDRESS             : ${PUBLIC_ADDRESS}
 
 metadata:
   annotations:
@@ -16,15 +19,35 @@ metadata:
   name: knowage-claims
 
 parameters:
-- description: Target Project Name
-  displayname: Target Project Name
-  name: PROJECT_NAME
+- description: Application Name
+  displayname: Application Name
+  name: APPLICATION
   required: true
-- description: Username for MariaDB user that will be used for accessing the database.
-  displayName: MariaDB Connection Username
-  from: user[A-Z0-9]{3}
+- description: Knowage version
+  displayname: Knowage Version
+  name: KNOWAGE_VERSION
+  required: true
+  value: '8.0.0'
+- description: FQDN Public Route
+  displayname: FQDN Public Route
+  name: PUBLIC_ADDRESS
+  required: true
+  value: '127.0.0.1'
+- description: MariaDB service name
+  displayName: MariaDB Service Name
+  name: MARIADB_SERVICE
+  required: true
+- description: Secret key to generate JWT tokens used by the default security mechanism
+  displayName: Secret key to generate JWT tokens used by the default security mechanism
+  from: '[a-z0-9]{6}'
   generate: expression
-  name: MARIADB_USER
+  name: HMAC_KEY
+  required: true
+- description: The password encryption secret
+  displayName: The password encryption secret
+  from: '[a-zA-Z0-9]{15}'
+  generate: expression
+  name: PASSWORD_ENCRYPTION_SECRET
   required: true
 
 objects:
@@ -32,14 +55,13 @@ objects:
   kind: DeploymentConfig
   metadata:
     labels:
-      app: knowage
-    name: knowage
+      app: ${APPLICATION}
+    name: ${APPLICATION}
   spec:
     replicas: 1
     revisionHistoryLimit: 3
     selector:
-      app: knowage
-      deploymentconfig: knowage
+      app: ${APPLICATION}
     strategy:
       activeDeadlineSeconds: 21600
       resources: {}
@@ -53,8 +75,7 @@ objects:
     template:
       metadata:
         labels:
-          app: knowage
-          deploymentconfig: knowage
+          app: ${APPLICATION}
       spec:
         containers:
         - env:
@@ -62,68 +83,74 @@ objects:
             valueFrom:
               secretKeyRef:
                 key: database-name
-                name: mariadb
+                name: ${MARIADB_SERVICE}
           - name: DB_ENV_MYSQL_USER
             valueFrom:
               secretKeyRef:
                 key: database-user
-                name: mariadb
+                name: ${MARIADB_SERVICE}
           - name: DB_ENV_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
                 key: database-password
-                name: mariadb
+                name: ${MARIADB_SERVICE}
           - name: DB_PORT_3306_TCP_ADDR
-            value: mariadb
+            value: ${MARIADB_SERVICE}
           - name: DB_PORT_3306_TCP_PORT
             value: "3306"
-          - name: HMAC_KEY
-            value: abc123
-          - name: PASSWORD_ENCRYPTION_SECRET
-            value: def456
           - name: DB_DB
             valueFrom:
               secretKeyRef:
                 key: database-name
-                name: mariadb
+                name: ${MARIADB_SERVICE}
           - name: DB_PORT
             value: "3306"
           - name: DB_HOST
-            value: mariadb
+            value: ${MARIADB_SERVICE}
           - name: DB_USER
             valueFrom:
               secretKeyRef:
                 key: database-user
-                name: mariadb
+                name: ${MARIADB_SERVICE}
           - name: DB_PASS
             valueFrom:
               secretKeyRef:
                 key: database-password
-                name: mariadb
+                name: ${MARIADB_SERVICE}
           - name: CACHE_DB_DB
             valueFrom:
               secretKeyRef:
                 key: database-name
-                name: mariadb
+                name: ${MARIADB_SERVICE}
           - name: CACHE_DB_PORT
             value: "3306"
           - name: CACHE_DB_HOST
-            value: mariadb
+            value: ${MARIADB_SERVICE}
           - name: CACHE_DB_USER
             valueFrom:
               secretKeyRef:
                 key: database-user
-                name: mariadb
+                name: ${MARIADB_SERVICE}
           - name: CACHE_DB_PASS
             valueFrom:
               secretKeyRef:
                 key: database-password
-                name: mariadb
+                name: ${MARIADB_SERVICE}
           - name: PUBLIC_ADDRESS
-            value: 127.0.0.1
-          image: docker-registry.default.svc:5000/spo-dev/knowage@sha256:734318334404fb80b6878c275cc7e519f35810b4d9abe7d566cbdc850c10b2e5
+            value: ${PUBLIC_ADDRESS}
+          - name: HMAC_KEY
+            valueFrom:
+              secretKeyRef:
+                key: hmac-key
+                name: ${APPLICATION}
+          - name: PASSWORD_ENCRYPTION_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: password-encryption-secret
+                name: ${APPLICATION}
+          image: ""
           imagePullPolicy: Always
-          name: knowage
+          name: ${APPLICATION}
           ports:
           - containerPort: 8009
             protocol: TCP
@@ -136,6 +163,26 @@ objects:
           resources: {}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /knowage
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 180
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /knowage
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 180
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         schedulerName: default-scheduler
@@ -147,20 +194,28 @@ objects:
     - imageChangeParams:
         automatic: true
         containerNames:
-        - knowage
+        - ${APPLICATION}
         from:
           kind: ImageStreamTag
-          name: knowage:latest
-          namespace: spo-dev
-        lastTriggeredImage: docker-registry.default.svc:5000/spo-dev/knowage@sha256:734318334404fb80b6878c275cc7e519f35810b4d9abe7d566cbdc850c10b2e5
+          name: claims-knowage:${KNOWAGE_VERSION}
       type: ImageChange
+
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    labels:
+      app: ${APPLICATION}
+    name: ${APPLICATION}
+  stringData:
+    hmac-key: ${HMAC_KEY}
+    password-encryption-secret: ${PASSWORD_ENCRYPTION_SECRET}
 
 - apiVersion: v1
   kind: Service
   metadata:
     labels:
-      app: knowage
-    name: knowage
+      app: ${APPLICATION}
+    name: ${APPLICATION}
   spec:
     ports:
     - name: 8009-tcp
@@ -180,7 +235,7 @@ objects:
       protocol: TCP
       targetPort: 8778
     selector:
-      app: knowage
+      app: ${APPLICATION}
     sessionAffinity: None
     type: ClusterIP
 
@@ -188,16 +243,16 @@ objects:
   kind: Route
   metadata:
     labels:
-      app: knowage
-    name: knowage
+      app: ${APPLICATION}
+    name: ${APPLICATION}
   spec:
-    host: knowage-spo-dev.paas-rec.sigma.fr
+    host: ${APPLICATION}-spo-dev.paas-rec.sigma.fr
     port:
       targetPort: 8080
     tls:
       termination: edge
     to:
       kind: Service
-      name: knowage
+      name: ${APPLICATION}
       weight: 100
     wildcardPolicy: None
