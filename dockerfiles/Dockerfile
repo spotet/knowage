@@ -89,9 +89,9 @@ COPY extGlobalResources ${JWS_HOME}/conf/server.xml.d
 COPY extContext ${JWS_HOME}/conf/context.xml.d
 COPY CHANGELOG.md LICENSE README.md entrypoint.sh wait-for-it.sh ${JWS_HOME}/
 
-RUN chmod +x ${JWS_HOME}/bin/* && chmod +x ${JWS_HOME}/* && chown -R jboss ${JWS_HOME}/* && sed -i "s|apache-tomcat\/||g" ${KNOWAGE_DIRECTORY}/entrypoint.sh && \
+RUN mkdir ${JWS_HOME}/CONTAINER_INITIALIZED && chmod +x ${JWS_HOME}/bin/* && chmod +x ${JWS_HOME}/* && chown -R jboss ${JWS_HOME}/* && sed -i "s|apache-tomcat\/||g" ${KNOWAGE_DIRECTORY}/entrypoint.sh && \
     chmod -R g+w ${JWS_HOME}/ && \
-    sed -i "s|CONTAINER_INITIALIZED_PLACEHOLDER=\/.CONTAINER_INITIALIZED|CONTAINER_INITIALIZED_PLACEHOLDER=/tmp/.CONTAINER_INITIALIZED|g" ${KNOWAGE_DIRECTORY}/entrypoint.sh
+    sed -i "s|CONTAINER_INITIALIZED_PLACEHOLDER=\/.CONTAINER_INITIALIZED|CONTAINER_INITIALIZED_PLACEHOLDER=${JWS_HOME}/CONTAINER_INITIALIZED/.CONTAINER_INITIALIZED|g" ${KNOWAGE_DIRECTORY}/entrypoint.sh
 
 WORKDIR ${KNOWAGE_DIRECTORY}
 
