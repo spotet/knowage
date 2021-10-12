@@ -13,7 +13,7 @@ Cette section récapitule les différentes étapes pour instancier l'entièreté
 
 ### MariaDB
 
-Pour déployer le MariaDB, déployer le Template Openshift MariaDB depuis le catalogue (Attention ne pas utiliser la version Ephemeral !), nommer la database : mariadb-<client>
+Pour déployer le MariaDB, déployer le Template Openshift MariaDB depuis le catalogue (Attention ne pas utiliser la version Ephemeral !), nommer la database : mariadb-<<client>>
 
 Un sercret "mariadb-<client>" est généré contenant les identifiants et la nom de la base données.
 
