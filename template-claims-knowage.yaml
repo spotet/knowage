@@ -4,9 +4,11 @@ message: |-
   Below the information of generated entries, tokens and passwords :
 
     APPLICATION                : ${APPLICATION}
+    MARIADB_SERVICE            : ${MARIADB_SERVICE}
     HMAC_KEY                   : ${HMAC_KEY}
     PASSWORD_ENCRYPTION_SECRET : ${PASSWORD_ENCRYPTION_SECRET}
     PUBLIC_ADDRESS             : ${PUBLIC_ADDRESS}
+    AJP_SECRET                 : ${AJP_SECRET}
 
 metadata:
   annotations:
@@ -32,7 +34,7 @@ parameters:
   displayname: FQDN Public Route
   name: PUBLIC_ADDRESS
   required: true
-  value: '127.0.0.1'
+  value: 'localhost'
 - description: MariaDB service name
   displayName: MariaDB Service Name
   name: MARIADB_SERVICE
@@ -48,6 +50,12 @@ parameters:
   from: '[a-zA-Z0-9]{15}'
   generate: expression
   name: PASSWORD_ENCRYPTION_SECRET
+  required: true
+- description: AJP secret protocol
+  displayName: AJP Secret Protocol
+  from: '[a-zA-Z0-9]{15}'
+  generate: expression
+  name: AJP_SECRET
   required: true
 
 objects:
@@ -118,10 +126,7 @@ objects:
                 key: database-password
                 name: ${MARIADB_SERVICE}
           - name: CACHE_DB_DB
-            valueFrom:
-              secretKeyRef:
-                key: database-name
-                name: ${MARIADB_SERVICE}
+            value: knowage_cache
           - name: CACHE_DB_PORT
             value: "3306"
           - name: CACHE_DB_HOST
@@ -147,6 +152,11 @@ objects:
             valueFrom:
               secretKeyRef:
                 key: password-encryption-secret
+                name: ${APPLICATION}
+          - name: AJP_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: ajp-secret
                 name: ${APPLICATION}
           image: ""
           imagePullPolicy: Always
@@ -175,7 +185,7 @@ objects:
               path: /knowage
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 180
+            initialDelaySeconds: 210
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 3
@@ -185,7 +195,7 @@ objects:
               path: /knowage
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 180
+            initialDelaySeconds: 210
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 3
@@ -215,6 +225,7 @@ objects:
   stringData:
     hmac-key: ${HMAC_KEY}
     password-encryption-secret: ${PASSWORD_ENCRYPTION_SECRET}
+    ajp-secret: ${AJP_SECRET}
 
 - apiVersion: v1
   kind: Service
@@ -262,3 +273,239 @@ objects:
       name: ${APPLICATION}
       weight: 100
     wildcardPolicy: None
+
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    generateName: ${APPLICATION}-waitforbdd-
+    labels:
+      app: ${APPLICATION}
+  spec:
+    backoffLimit: 1
+    completions: 1
+    parallelism: 1
+    template:
+      metadata:
+        labels:
+          app: ${APPLICATION}
+        name: ${APPLICATION}-waitforbdd
+      spec:
+        activeDeadlineSeconds: 3600
+        containers:
+        - args:
+          - -c
+          - /scripts/wait-for-it.sh ${CACHE_DB_HOST}:${CACHE_DB_PORT} -t 3600 -- echo "MySql is
+            up!" && mysql -u root -h ${CACHE_DB_HOST} -P ${CACHE_DB_PORT} -e 'CREATE DATABASE knowage_cache;'
+            && echo "Database knowage_cache Create Succesfully !"
+          command:
+          - bash
+          env:
+          - name: CACHE_DB_PORT
+            value: "3306"
+          - name: CACHE_DB_HOST
+            value: ${MARIADB_SERVICE}
+          - name: MYSQL_PWD
+            valueFrom:
+              secretKeyRef:
+                key: database-root-password
+                name: ${MARIADB_SERVICE}
+          image: docker-registry.default.svc:5000/openshift/mariadb:latest
+          imagePullPolicy: Always
+          name: knowage-spo-waitforbdd
+          volumeMounts:
+          - mountPath: /scripts
+            name: wait-for-it
+        restartPolicy: Never
+        volumes:
+        - configMap:
+            defaultMode: 511
+            items:
+            - key: wait-for-it.sh
+              path: wait-for-it.sh
+            name: wait-for-it
+          name: wait-for-it
+
+- apiVersion: v1
+  data:
+    wait-for-it.sh: |-
+      #!/usr/bin/env bash
+      #   Use this script to test if a given TCP host/port are available
+
+      WAITFORIT_cmdname=${0##*/}
+
+      echoerr() { if [[ $WAITFORIT_QUIET -ne 1 ]]; then echo "$@" 1>&2; fi }
+
+      usage()
+      {
+          cat << USAGE >&2
+      Usage:
+          $WAITFORIT_cmdname host:port [-s] [-t timeout] [-- command args]
+          -h HOST | --host=HOST       Host or IP under test
+          -p PORT | --port=PORT       TCP port under test
+                                      Alternatively, you specify the host and port as host:port
+          -s | --strict               Only execute subcommand if the test succeeds
+          -q | --quiet                Don't output any status messages
+          -t TIMEOUT | --timeout=TIMEOUT
+                                      Timeout in seconds, zero for no timeout
+          -- COMMAND ARGS             Execute command with args after the test finishes
+      USAGE
+          exit 1
+      }
+
+      wait_for()
+      {
+          if [[ $WAITFORIT_TIMEOUT -gt 0 ]]; then
+              echoerr "$WAITFORIT_cmdname: waiting $WAITFORIT_TIMEOUT seconds for $WAITFORIT_HOST:$WAITFORIT_PORT"
+          else
+              echoerr "$WAITFORIT_cmdname: waiting for $WAITFORIT_HOST:$WAITFORIT_PORT without a timeout"
+          fi
+          WAITFORIT_start_ts=$(date +%s)
+          while :
+          do
+              if [[ $WAITFORIT_ISBUSY -eq 1 ]]; then
+                  nc -z $WAITFORIT_HOST $WAITFORIT_PORT
+                  WAITFORIT_result=$?
+              else
+                  (echo > /dev/tcp/$WAITFORIT_HOST/$WAITFORIT_PORT) >/dev/null 2>&1
+                  WAITFORIT_result=$?
+              fi
+              if [[ $WAITFORIT_result -eq 0 ]]; then
+                  WAITFORIT_end_ts=$(date +%s)
+                  echoerr "$WAITFORIT_cmdname: $WAITFORIT_HOST:$WAITFORIT_PORT is available after $((WAITFORIT_end_ts - WAITFORIT_start_ts)) seconds"
+                  break
+              fi
+              sleep 1
+          done
+          return $WAITFORIT_result
+      }
+
+      wait_for_wrapper()
+      {
+          # In order to support SIGINT during timeout: http://unix.stackexchange.com/a/57692
+          if [[ $WAITFORIT_QUIET -eq 1 ]]; then
+              timeout $WAITFORIT_BUSYTIMEFLAG $WAITFORIT_TIMEOUT $0 --quiet --child --host=$WAITFORIT_HOST --port=$WAITFORIT_PORT --timeout=$WAITFORIT_TIMEOUT &
+          else
+              timeout $WAITFORIT_BUSYTIMEFLAG $WAITFORIT_TIMEOUT $0 --child --host=$WAITFORIT_HOST --port=$WAITFORIT_PORT --timeout=$WAITFORIT_TIMEOUT &
+          fi
+          WAITFORIT_PID=$!
+          trap "kill -INT -$WAITFORIT_PID" INT
+          wait $WAITFORIT_PID
+          WAITFORIT_RESULT=$?
+          if [[ $WAITFORIT_RESULT -ne 0 ]]; then
+              echoerr "$WAITFORIT_cmdname: timeout occurred after waiting $WAITFORIT_TIMEOUT seconds for $WAITFORIT_HOST:$WAITFORIT_PORT"
+          fi
+          return $WAITFORIT_RESULT
+      }
+
+      # process arguments
+      while [[ $# -gt 0 ]]
+      do
+          case "$1" in
+              *:* )
+              WAITFORIT_hostport=(${1//:/ })
+              WAITFORIT_HOST=${WAITFORIT_hostport[0]}
+              WAITFORIT_PORT=${WAITFORIT_hostport[1]}
+              shift 1
+              ;;
+              --child)
+              WAITFORIT_CHILD=1
+              shift 1
+              ;;
+              -q | --quiet)
+              WAITFORIT_QUIET=1
+              shift 1
+              ;;
+              -s | --strict)
+              WAITFORIT_STRICT=1
+              shift 1
+              ;;
+              -h)
+              WAITFORIT_HOST="$2"
+              if [[ $WAITFORIT_HOST == "" ]]; then break; fi
+              shift 2
+              ;;
+              --host=*)
+              WAITFORIT_HOST="${1#*=}"
+              shift 1
+              ;;
+              -p)
+              WAITFORIT_PORT="$2"
+              if [[ $WAITFORIT_PORT == "" ]]; then break; fi
+              shift 2
+              ;;
+              --port=*)
+              WAITFORIT_PORT="${1#*=}"
+              shift 1
+              ;;
+              -t)
+              WAITFORIT_TIMEOUT="$2"
+              if [[ $WAITFORIT_TIMEOUT == "" ]]; then break; fi
+              shift 2
+              ;;
+              --timeout=*)
+              WAITFORIT_TIMEOUT="${1#*=}"
+              shift 1
+              ;;
+              --)
+              shift
+              WAITFORIT_CLI=("$@")
+              break
+              ;;
+              --help)
+              usage
+              ;;
+              *)
+              echoerr "Unknown argument: $1"
+              usage
+              ;;
+          esac
+      done
+
+      if [[ "$WAITFORIT_HOST" == "" || "$WAITFORIT_PORT" == "" ]]; then
+          echoerr "Error: you need to provide a host and port to test."
+          usage
+      fi
+
+      WAITFORIT_TIMEOUT=${WAITFORIT_TIMEOUT:-15}
+      WAITFORIT_STRICT=${WAITFORIT_STRICT:-0}
+      WAITFORIT_CHILD=${WAITFORIT_CHILD:-0}
+      WAITFORIT_QUIET=${WAITFORIT_QUIET:-0}
+
+      # check to see if timeout is from busybox?
+      WAITFORIT_TIMEOUT_PATH=$(type -p timeout)
+      WAITFORIT_TIMEOUT_PATH=$(realpath $WAITFORIT_TIMEOUT_PATH 2>/dev/null || readlink -f $WAITFORIT_TIMEOUT_PATH)
+      if [[ $WAITFORIT_TIMEOUT_PATH =~ "busybox" ]]; then
+              WAITFORIT_ISBUSY=1
+              WAITFORIT_BUSYTIMEFLAG="-t"
+
+      else
+              WAITFORIT_ISBUSY=0
+              WAITFORIT_BUSYTIMEFLAG=""
+      fi
+
+      if [[ $WAITFORIT_CHILD -gt 0 ]]; then
+          wait_for
+          WAITFORIT_RESULT=$?
+          exit $WAITFORIT_RESULT
+      else
+          if [[ $WAITFORIT_TIMEOUT -gt 0 ]]; then
+              wait_for_wrapper
+              WAITFORIT_RESULT=$?
+          else
+              wait_for
+              WAITFORIT_RESULT=$?
+          fi
+      fi
+
+      if [[ $WAITFORIT_CLI != "" ]]; then
+          if [[ $WAITFORIT_RESULT -ne 0 && $WAITFORIT_STRICT -eq 1 ]]; then
+              echoerr "$WAITFORIT_cmdname: strict mode, refusing to execute subprocess"
+              exit $WAITFORIT_RESULT
+          fi
+          exec "${WAITFORIT_CLI[@]}"
+      else
+          exit $WAITFORIT_RESULT
+      fi
+  kind: ConfigMap
+  metadata:
+    name: wait-for-it
