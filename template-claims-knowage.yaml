@@ -9,6 +9,7 @@ message: |-
     PASSWORD_ENCRYPTION_SECRET : ${PASSWORD_ENCRYPTION_SECRET}
     PUBLIC_ADDRESS             : ${PUBLIC_ADDRESS}
     AJP_SECRET                 : ${AJP_SECRET}
+    APPLICATION_PUBLIC_DOMAIN  : ${APPLICATION_PUBLIC_DOMAIN}
 
 metadata:
   annotations:
@@ -30,11 +31,21 @@ parameters:
   name: KNOWAGE_VERSION
   required: true
   value: '8.0.0'
-- description: FQDN Public Route
-  displayname: FQDN Public Route
+- description: Knowage Public Address. Default : localhost
+  displayname: Knowage Public Address
   name: PUBLIC_ADDRESS
   required: true
   value: 'localhost'
+- description: FQDN Public Route
+  displayname: FQDN Public Route
+  name: APPLICATION_PUBLIC_DOMAIN
+  required: true
+  value: 'localhost'
+- description: Knowage ImageStream Name
+  displayName: Knowage ImageStream Name
+  name: KNOWAGE_IS
+  required: true
+  value: knowage
 - description: MariaDB service name
   displayName: MariaDB Service Name
   name: MARIADB_SERVICE
@@ -213,7 +224,7 @@ objects:
         - ${APPLICATION}
         from:
           kind: ImageStreamTag
-          name: claims-knowage:${KNOWAGE_VERSION}
+          name: ${KNOWAGE_IS}:${KNOWAGE_VERSION}
       type: ImageChange
 
 - apiVersion: v1
@@ -263,7 +274,7 @@ objects:
       app: ${APPLICATION}
     name: ${APPLICATION}
   spec:
-    host: ${APPLICATION}-spo-dev.paas-rec.sigma.fr
+    host: ${APPLICATION_PUBLIC_DOMAIN}
     port:
       targetPort: 8080
     tls:

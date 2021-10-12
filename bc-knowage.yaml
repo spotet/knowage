@@ -9,9 +9,9 @@ items:
   apiVersion: image.openshift.io/v1
   metadata:
     labels:
-      build: claims-knowage
-      app: claims-knowage
-    name: claims-knowage
+      build: knowage
+      app: knowage
+    name: knowage
   spec:
     lookupPolicy:
       local: true
@@ -20,9 +20,9 @@ items:
   apiVersion: build.openshift.io/v1
   metadata:
     labels:
-      build: claims-knowage
-      app: claims-knowage
-    name: claims-knowage
+      build: knowage
+      app: knowage
+    name: knowage
   spec:
     resources:
       limits:
@@ -35,7 +35,7 @@ items:
     output:
       to:
         kind: ImageStreamTag
-        name: 'claims-knowage:8.0.0'
+        name: 'knowage:8.0.0'
     runPolicy: Serial
     source:
       contextDir: '/dockerfiles'

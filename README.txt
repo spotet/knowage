@@ -12,7 +12,7 @@ sh-4.2$ cat ./webapps/knowage/themes/sbi_default/jsp/login.jsp
 The userid/password is biadmin/biadmin
 
 oc new-app --template=openshift/mariadb-ephemeral --name mariadb2 -p APPLICATION=mariadb2 -p MYSQL_DATABASE=knowage
-oc new-app --template=spo-dev/knowage-claims --name knowage -p APPLICATION=knowage-spo2 -p MARIADB_SERVICE=mariadb2
+oc new-app --template=spo-dev/knowage-claims --name knowage -p APPLICATION=knowage-spo2 -p MARIADB_SERVICE=mariadb2 -p APPLICATION_PUBLIC_DOMAIN=knowage-spo-spo-dev.paas-rec.sigma.fr
 
 oc delete all,cm,secret -l app=knowage-spo -n spo-dev
 oc delete cm wait-for-it -n spo-dev
