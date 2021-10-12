@@ -13,9 +13,12 @@ Cette section récapitule les différentes étapes pour instancier l'entièreté
 
 ### MariaDB
 
-Pour déployer le MariaDB, déployer le Template Openshift MariaDB depuis le catalogue (Attention ne pas utiliser la version Ephemeral !), nommer la database : mariadb-<<client>>
+Pour déployer le MariaDB, déployer le Template Openshift MariaDB depuis le catalogue (Attention ne pas utiliser la version Ephemeral !), nommer la database :
+``` bash
+ mariadb-<client>
+```
 
-Un sercret "mariadb-<client>" est généré contenant les identifiants et la nom de la base données.
+Un sercret mariadb-"client" est généré contenant les identifiants et la nom de la base données.
 
 ### Imagestream Knowage
 
@@ -41,14 +44,14 @@ Pour instancier le template de l'application , il faut préciser différentes in
 - L'adresse d'accès à la BDD (Nom du service openshift MariaDB) MARIADB_SERVICE
 - L'imagestream Knowage (Nom de l'imagestream openshift) KNOWAGE_IS (Default knowage)
 - Version du tag de l'imagestream knowage (Nom du tag de l'imagestream openshift) KNOWAGE_VERSION (Default 8.0.0)
-- Request et Limit de l'application Keycloak (Request at Limit) MEMORY_LIMIT / CPU_LIMIT / MEMORY_REQUEST / CPU_REQUEST
+- Request et Limit de l'application knowage (Request at Limit) MEMORY_LIMIT / CPU_LIMIT / MEMORY_REQUEST / CPU_REQUEST
 
 Pour créer le template, exécuter la commande suivante :
 ``` bash
 oc create -f template-claims-knowage.yaml
 ```
 
-Instancier ensuite l'application en utilisant le template depuis le portail Openshift (Keycloak-Ageval) ou en ligne de commande :
+Instancier ensuite l'application en utilisant le template depuis le portail Openshift (knowage-claims) ou en ligne de commande :
 ``` bash
 oc new-app --template=<PROJECT NAME>/knowage-claims --name knowage -p APPLICATION=<APPLICATION NAME> -p MARIADB_SERVICE=<MARIADB SERVICE NAME> -p APPLICATION_PUBLIC_DOMAIN=<ROUTE NAME>
 ```
